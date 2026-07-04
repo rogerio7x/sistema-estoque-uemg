@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Estoque — Peças</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar__rivet topbar__rivet--left" aria-hidden="true"></div>
+    <div class="topbar__text">
+        <p class="topbar__eyebrow">Gestão de peças</p>
+        <h1 class="topbar__title">Controle de Estoque</h1>
+    </div>
+    <div class="topbar__rivet topbar__rivet--right" aria-hidden="true"></div>
+</header>
+
+<main class="wrap">
+
+    <!-- Painel de instrumentos -->
+    <section class="gauges" aria-label="Resumo do estoque">
+        <div class="gauge">
+            <span class="gauge__label">Peças cadastradas</span>
+            <span class="gauge__value" id="statTotalPecas">0</span>
+        </div>
+        <div class="gauge gauge--warn">
+            <span class="gauge__label">Em baixo estoque</span>
+            <span class="gauge__value" id="statBaixoEstoque">0</span>
+        </div>
+        <div class="gauge gauge--wide">
+            <span class="gauge__label">Valor total em estoque</span>
+            <span class="gauge__value" id="statValorTotal">R$ 0,00</span>
+        </div>
+    </section>
+
+    <!-- Barra de ferramentas -->
+    <section class="toolbar">
+        <div class="search">
+            <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.916 12.13l4.727 4.727a1 1 0 01-1.415 1.415l-4.726-4.727A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
+            <input type="text" id="inputBusca" placeholder="Buscar por nome ou código SKU…" autocomplete="off">
+        </div>
+        <button class="btn btn--amber" id="btnNovaPeca" type="button">
+            <span class="btn__plus" aria-hidden="true">+</span> Nova peça
+        </button>
+    </section>
+
+    <!-- Tabela de peças -->
+    <section class="board" aria-label="Lista de peças">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="th-codigo">Código</th>
+                    <th>Peça</th>
+                    <th class="th-num">Qtd.</th>
+                    <th class="th-num">Preço</th>
+                    <th class="th-acoes">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaPecas">
+                <!-- linhas inseridas via JS -->
+            </tbody>
+        </table>
+
+        <div class="empty" id="estadoVazio" hidden>
+            <svg viewBox="0 0 24 24" class="empty__icon" aria-hidden="true"><path d="M21.71 20.29l-4.42-4.42A8.5 8.5 0 1015.87 17.3l4.42 4.42a1 1 0 001.42-1.43zM4 10.5A6.5 6.5 0 1110.5 17 6.51 6.51 0 014 10.5z"/></svg>
+            <p><strong>Nenhuma peça encontrada.</strong><br>Cadastre a primeira peça ou ajuste sua busca.</p>
+        </div>
+    </section>
+</main>
+
+<!-- Modal: Ficha de Peça -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal__header">
+            <h2 id="modalTitle">Cadastrar peça</h2>
+            <button class="modal__close" id="btnFecharModal" type="button" aria-label="Fechar">&times;</button>
+        </div>
+        <form class="modal__body" id="formPeca">
+            <input type="hidden" id="pecaId">
+
+            <label class="field">
+                <span class="field__label">Nome da peça</span>
+                <input type="text" id="nome" required placeholder="Ex.: Filtro de Óleo">
+            </label>
+
+            <label class="field">
+                <span class="field__label">Código SKU</span>
+                <input type="text" id="sku" required placeholder="Ex.: FO-123" class="mono">
+            </label>
+
+            <div class="field-row">
+                <label class="field">
+                    <span class="field__label">Quantidade</span>
+                    <input type="number" id="quantidade" required min="0" step="1" placeholder="0" class="mono">
+                </label>
+                <label class="field">
+                    <span class="field__label">Preço (R$)</span>
+                    <input type="number" id="preco" required min="0" step="0.01" placeholder="0,00" class="mono">
+                </label>
+            </div>
+
+            <p class="field-erro" id="formErro" hidden></p>
+        </form>
+        <div class="modal__footer">
+            <button class="btn btn--ghost" id="btnCancelar" type="button">Cancelar</button>
+            <button class="btn btn--amber" id="btnSalvar" type="button">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar exclusão -->
+<div class="modal-overlay" id="modalConfirmOverlay" hidden>
+    <div class="modal modal--sm" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="modal__header modal__header--rust">
+            <h2 id="confirmTitle">Excluir peça</h2>
+        </div>
+        <div class="modal__body">
+            <p id="confirmTexto">Tem certeza que deseja excluir esta peça? Essa ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal__footer">
+            <button class="btn btn--ghost" id="btnCancelarExclusao" type="button">Cancelar</button>
+            <button class="btn btn--rust" id="btnConfirmarExclusao" type="button">Excluir</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toasts -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
