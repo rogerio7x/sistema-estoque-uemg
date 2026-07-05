@@ -9,7 +9,7 @@ const ESTOQUE_MINIMO = 10; // abaixo disso, a peça é considerada em baixo esto
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 const db = new sqlite3.Database('./database.sqlite');
 

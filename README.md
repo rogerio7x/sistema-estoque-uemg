@@ -86,13 +86,13 @@ Abaixo estão as rotas RESTful disponibilizadas pelo back-end:
 - Validação dos dados antes de salvar/editar (nome e SKU obrigatórios, quantidade inteira ≥ 0, preço ≥ 0).
 - SKU agora é único no banco — tentar cadastrar um código repetido retorna erro 409 com mensagem clara.
 - Mensagens de erro específicas (antes retornava o erro cru do SQLite).
-- O servidor agora também serve o front-end (`public/`), então front e back rodam juntos na mesma porta.
+- O servidor agora também serve o front-end (`frontend/`), então front e back rodam juntos na mesma porta.
 
 ### Banco (`dump.sql`)
 - `codigo_sku` configurado como `UNIQUE`.
 - Adição das colunas `criado_em` / `atualizado_em` para rastrear mudanças.
 
-### Frontend (`public/`)
+### Frontend (`frontend/`)
 - Interface toda redesenhada com identidade visual própria (tema "bancada de oficina"), sem depender do Bootstrap.
 - Confirmação de exclusão em modal customizado (em vez do `confirm()` nativo do navegador).
 - Notificações (toasts) de sucesso/erro não intrusivas.
